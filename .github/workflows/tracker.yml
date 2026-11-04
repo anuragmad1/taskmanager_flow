@@ -1,0 +1,36 @@
+
+# Outdated method provided on canvas used ai to patch, but changed code myself
+
+name: Proj Automation
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  move-issue-to-done:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        # Step 1: Checks out the repository to the runner's environment,
+        # ensuring access to the project files for subsequent operations.
+        uses: actions/checkout@v2
+
+      - name: mergin of pr
+        # Step 2: Verifies if the pull request is merged.
+        # If merged, it proceeds to move the associated issue to the "Done" column.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Pull request #${{ github.event.pull_request.number }} merged."
+          gh pr view "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --json closingIssuesReferences \
+            --jq '.closingIssuesReferences[] | "Linked issue: #\(.number) - \(.title)"'
